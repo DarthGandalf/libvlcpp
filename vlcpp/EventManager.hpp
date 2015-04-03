@@ -67,7 +67,7 @@ private:
     {
     public:
         EventHandler(EventManager& em, libvlc_event_e eventType, Func&& userCallback, Wrapper wrapper)
-            : m_userCallback( std::forward<Func>(userCallback) )
+            : m_userCallback( std::move(userCallback) )
             , m_eventManager(&em)
             , m_wrapper(wrapper)
             , m_eventType( eventType )
@@ -203,7 +203,7 @@ protected:
 
 protected:
     // We store the EventHandlerBase's as unique_ptr in order for the function stored within
-    // EventHandler<T> not to move to another memory location
+    // EventHandler<T> not to move to another memory location (its location is known by libvlc_event_attach())
     std::vector<std::unique_ptr<EventHandlerBase>> m_lambdas;
 };
 

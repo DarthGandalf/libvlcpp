@@ -95,7 +95,7 @@ namespace VLC
     template <typename Func>
     struct CallbackHandler : public CallbackHandlerBase
     {
-        CallbackHandler(Func&& f) : func( std::forward<Func>( f ) ) {}
+        CallbackHandler(Func&& f) : func( std::move( f ) ) {}
         Func func;
     };
 
@@ -124,12 +124,12 @@ namespace VLC
         template <int NbEvents>
         static Wrapped* wrap(EventOwner<NbEvents>* owner, Func&& func)
         {
-            owner->callbacks[Idx] = std::shared_ptr<CallbackHandlerBase>( new CallbackHandler<Func>( std::forward<Func>( func ) ) );
+            owner->callbacks[Idx] = std::make_shared<CallbackHandler<Func>>( std::move( func ) );
             return [](void* opaque, Args... args) -> Ret {
                 auto self = reinterpret_cast<EventOwner<NbEvents>*>(opaque);
                 assert(self->callbacks[Idx].get());
                 auto cbHandler = static_cast<CallbackHandler<Func>*>( self->callbacks[Idx].get() );
-                return cbHandler->func( std::forward<Args>(args)... );
+                return cbHandler->func( std::move(args)... );
             };
         }
     };
@@ -144,12 +144,12 @@ namespace VLC
         template <int NbEvents>
         static Wrapped* wrap(EventOwner<NbEvents>* owner, Func&& func)
         {
-            owner->callbacks[Idx] = std::shared_ptr<CallbackHandlerBase>( new CallbackHandler<Func>( std::forward<Func>( func ) ) );
+            owner->callbacks[Idx] = std::make_shared<CallbackHandler<Func>>( std::move( func ) );
             return [](void** opaque, Args... args) -> Ret {
                 auto self = reinterpret_cast<EventOwner<NbEvents>*>(*opaque);
                 assert(self->callbacks[Idx].get());
                 auto cbHandler = static_cast<CallbackHandler<Func>*>( self->callbacks[Idx].get() );
-                return cbHandler->func( std::forward<Args>(args)... );
+                return cbHandler->func( std::move(args)... );
             };
         }
     };
